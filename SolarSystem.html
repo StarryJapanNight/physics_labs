@@ -1,7 +1,6 @@
 <html>
 
 <style>
-
     #html_sun {
         width: 50px;
         height: 50px;
@@ -61,7 +60,6 @@
         left: 200px;
         top: 500px;
     }
-
 </style>
 
 <body style="background-color:black;">
@@ -89,22 +87,22 @@
 
     <script>
 
-        function make_vector(x_in,y_in) {
+        function make_vector(x_in, y_in) {
 
             let vector = {
                 x: x_in,
                 y: y_in,
                 add(v2) {
-                   return make_vector(this.x + v2.x, this.y + v2.y);
+                    return make_vector(this.x + v2.x, this.y + v2.y);
                 },
                 sub(v2) {
-                   return make_vector(this.x - v2.x, this.y - v2.y);
+                    return make_vector(this.x - v2.x, this.y - v2.y);
                 },
                 sm(scalar) {
-                    return make_vector(this.x*scalar, this.y*scalar);
+                    return make_vector(this.x * scalar, this.y * scalar);
                 },
                 mag() {
-                    return Math.sqrt( Math.pow(this.x,2) + Math.pow(this.y,2) );
+                    return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
                 }
             };
 
@@ -117,8 +115,8 @@
 
         let sun = {
             mass: 1.0,
-            r: make_vector(400.0,500.0),
-            v: make_vector(0,0)
+            r: make_vector(400.0, 500.0),
+            v: make_vector(0, 0)
         };
 
         function make_planet(planet_name, orbital_r) {
@@ -127,7 +125,7 @@
             let au = 200.0;
 
             // Orbital Radius
-            let distance = orbital_r*au;
+            let distance = orbital_r * au;
 
             // Mass (1<=m<=10)
             let m = Math.random() * 0.9 + 0.1;
@@ -136,10 +134,10 @@
             let r0 = make_vector(sun.r.x + distance, sun.r.y);
 
             // Position relative to sun
-            let del0 = make_vector( r0.x-sun.r.x , r0.y-sun.r.y ) 
-            
+            let del0 = make_vector(r0.x - sun.r.x, r0.y - sun.r.y)
+
             // Initial velocity of planet
-            let v0 = make_vector(0.0, Math.sqrt(G*sun.mass/del0.mag()));
+            let v0 = make_vector(0.0, Math.sqrt(G * sun.mass / del0.mag()));
             console.log(v0);
             // Define planet object
             let planet = {
@@ -153,12 +151,12 @@
             // Returns planet object
             return planet;
         }
-
-        let p_mercury = make_planet("Mercury",0.21);
-        let p_venus = make_planet("Venus",0.72);
-        let p_earth = make_planet("Earth",1.00);
+        //as
+        let p_mercury = make_planet("Mercury", 0.21);
+        let p_venus = make_planet("Venus", 0.72);
+        let p_earth = make_planet("Earth", 1.00);
         let p_mars = make_planet("Mars", 1.52);
-        let p_jupiter = make_planet("Jupiter",5.20);
+        let p_jupiter = make_planet("Jupiter", 5.20);
 
         function start() {
 
@@ -180,8 +178,8 @@
                 frame(p_earth, html_earth);
                 frame(p_mars, html_mars);
                 frame(p_jupiter, html_jupiter);
-                            
-                }, 40); // 40ms = 25 fps
+
+            }, 40); // 40ms = 25 fps
 
             function frame(planet, html_planet) {
 
@@ -192,10 +190,10 @@
                 // Position relative to sun
                 let del = make_vector(planet.r.x - sun.r.x, planet.r.y - sun.r.y);
                 let r = del.mag();
-               
+
                 // Newtonian Gravity
                 let Fg = -G * (sun.mass * planet.mass) / Math.pow(r, 2);
-                let a = make_vector( (Fg / planet.mass)*(del.r.x / r), (Fg / planet.mass)*(del.r.y / r) );
+                let a = make_vector((Fg / planet.mass) * (del.r.x / r), (Fg / planet.mass) * (del.r.y / r));
 
                 // Update velocity
                 planet.v = planet.v.add(a.sm(dt));
@@ -203,13 +201,13 @@
                 // Update position
                 planet.r = planet.r.add(planet.v.sm(dt));
 
-                html_planet.style.left = Math.round(planet.r.x -10.0) + 'px';
+                html_planet.style.left = Math.round(planet.r.x - 10.0) + 'px';
                 html_planet.style.top = Math.round(planet.r.y - 10.0) + 'px';
 
             }
 
         }
-    
+
     </script>
 
 </body>
