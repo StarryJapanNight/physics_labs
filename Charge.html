@@ -1,0 +1,184 @@
+<html>
+
+<style>
+    .electron {
+        width: 20px;
+        height: 20px;
+        position: absolute;
+        background-color: green;
+        border-radius: 50%;
+        left: 200px;
+        top: 200px;
+    }
+</style>
+
+<body style="background-color:black;">
+
+    <div style="border:2px solid;border-color:white;width:800px;height:600px">
+        <p>
+            <button onclick="start()">Start</button>
+        </p>
+
+        <a id="time" style="color:white;"></a>
+
+        <div id="electron1" class="electron"></div>
+        <div id="electron2" class="electron"></div>
+
+    </div>
+
+    <script>
+
+        function make_vector(x_in, y_in, z_in) {
+
+            let vector = {
+                x: x_in,
+                y: y_in,
+                z: z_in,
+                sm: function (scalar) {
+                    return make_vector(scalar * this.x, scalar * this.y, scalar * this.z);
+                },
+                add: function (v2) {
+                    return make_vector(this.x + v2.x, this.y + v2.y, this.z + v2.z);
+                },
+                sub: function (v2) {
+                    return make_vector(this.x - v2.x, this.y - v2.y, this.z - v2.z);
+                },
+                mag: function () {
+                    return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2));
+                },
+                cp: function(v2) {
+                    return make_vector(this.y*v2.z-v2.y*this.z,this.z*v2.x-v2.z*this.x, this.x*v2.y-v2.x*this.y);
+                } 
+
+            }
+
+            return vector;
+        }
+
+        // Definition of a electron
+        function make_electron(charge_name) {
+
+            // Charge of electron
+            let q = -1.0;
+
+            // Mass of electron
+            let m = 0.1;
+
+            // Initial Position
+            let x0 = Math.random() * 800.0;
+            let y0 = Math.random() * 600.0;
+            let r0 = make_vector(x0, y0, 0);
+
+            // Initial velocity of electron
+            let vx0 = (Math.random() - 0.5) * 10.0;
+            let vy0 = (Math.random() - 0.5) * 10.0;
+            let v0 = make_vector(vx0, vy0, 0);
+         
+            // Define charge object
+            let charge = {
+                name: charge_name,
+                q: q,
+                m: m,
+                r: r0,
+                v: v0,
+            };
+
+            // Returns electron object
+            return charge;
+        }
+
+        function start() {
+
+            // HTML electron
+            let electron1 = document.getElementById("electron1");
+            let electron2 = document.getElementById("electron2");
+
+            // Define background EField
+            let efield = make_vector(0.0, 0.0, 0);
+            let bfield = make_vector(0, 0, 1);
+
+            // Make an electron
+            let e1 = make_electron("electron1");
+            let e2 = make_electron("electron2");
+
+            // Time
+            let t = 0.0;
+            let dt = 0.01;
+
+            // Timer (ms)
+            let id1 = setInterval(function () { frame(e1) }, 10);
+            let id2 = setInterval(function () { frame(e2) }, 10);
+
+            // Draw frame
+            function frame(e) {
+
+                // Update time
+                t = t + dt;
+
+                // Force F=qE
+                let fe = electric_force(efield, e);
+                let fb = magnetic_force(bfield, e);
+
+                // Update acceleration
+                let a = (fe.add(fb)).sm(1.0/e.m).sm(5.0/e.v.mag());
+
+                // Update velocity
+                let v_old = e.v;
+                e.v = e.v.add(a.sm(dt));
+
+                // Update position
+                e.r = e.r.add(  e.v.sm(0.5*dt).add(v_old.sm(0.5*dt)) );
+
+                // Boundary Conditions (Reflecting)
+                if ((e.r.x < 0) || (e.r.x > 800)) e.v.x = -e.v.x;
+                if ((e.r.y < 0) || (e.r.y > 800)) e.v.y = -e.v.y;
+
+                // Move the HTML object
+                if (e.name == "electron1") {
+                    electron1.style.left = Math.round(e.r.x) + 'px';
+                    electron1.style.top = Math.round(e.r.y) + 'px';
+                } else if (e.name == "electron2") {
+                    electron2.style.left = Math.round(e.r.x) + 'px';
+                    electron2.style.top = Math.round(e.r.y) + 'px';
+                }
+
+                console.log('V: ' + e.v.mag() + '  R: ' + e.r.mag());
+
+                // Update time
+                document.getElementById("time").innerHTML = "Time: " + Math.round(t);
+
+            }
+
+            // Electric Force (F=qE)
+            function electric_force(efield, charge) {
+
+                let f_e = efield.sm(charge.q);
+
+                return f_e;
+            }
+
+            // Magnetic Force
+            function magnetic_force(bfield, charge) {
+
+                let vxb = charge.v.cp(bfield);
+                let f_b = vxb.sm(charge.q);
+
+                return f_b;
+            }
+
+            // Coloumb Force
+            function coulomb(q1, q2, r) {
+
+                let k = 4000.0;
+                let f_e = k * q1 * q2 / Math.pow(r, 2);
+
+                return f_e;
+            }
+        }
+
+
+    </script>
+
+</body>
+
+</html>
