@@ -1,6 +1,12 @@
 <html>
 
 <style>
+    .html_orbit {
+        position: absolute;
+        border: dotted white 2px;
+        border-radius: 50%;
+    }
+
     #html_sun {
         width: 50px;
         height: 50px;
@@ -77,11 +83,18 @@
     <div>
 
         <div id="html_sun"></div>
+
         <div id="html_mercury"></div>
         <div id="html_venus"></div>
         <div id="html_earth"></div>
         <div id="html_mars"></div>
         <div id="html_jupiter"></div>
+
+        <div id="html_mercury_orbit" class="html_orbit"></div>
+        <div id="html_venus_orbit" class="html_orbit"></div>
+        <div id="html_earth_orbit" class="html_orbit"></div>
+        <div id="html_mars_orbit" class="html_orbit"></div>
+        <div id="html_jupiter_orbit" class="html_orbit"></div>
 
     </div>
 
@@ -119,10 +132,11 @@
             v: make_vector(0, 0)
         };
 
-        function make_planet(planet_name, orbital_r) {
 
-            // AU -> px
-            let au = 200.0;
+        // AU -> px
+        let au = 200.0;
+
+        function make_planet(planet_name, orbital_r) {
 
             // Orbital Radius
             let distance = orbital_r * au;
@@ -138,11 +152,11 @@
 
             // Initial velocity of planet
             let v0 = make_vector(0.0, Math.sqrt(G * sun.mass / del0.mag()));
-            console.log(v0);
+
             // Define planet object
             let planet = {
                 name: planet_name,
-                orbital_r: orbital_r,
+                orbital_r: distance,
                 mass: m,
                 r: r0,
                 v: v0
@@ -151,7 +165,7 @@
             // Returns planet object
             return planet;
         }
-        //as
+
         let p_mercury = make_planet("Mercury", 0.21);
         let p_venus = make_planet("Venus", 0.72);
         let p_earth = make_planet("Earth", 1.00);
@@ -166,6 +180,12 @@
             let html_mars = document.getElementById("html_mars");
             let html_jupiter = document.getElementById("html_jupiter");
 
+            let html_mercury_orbit = document.getElementById("html_mercury_orbit");
+            let html_venus_orbit = document.getElementById("html_venus_orbit");
+            let html_earth_orbit = document.getElementById("html_earth_orbit");
+            let html_mars_orbit = document.getElementById("html_mars_orbit");
+            let html_jupiter_orbit = document.getElementById("html_jupiter_orbit");
+
             // Time
             let t = 0;
             let dt = 0.1;
@@ -173,15 +193,21 @@
             // Timer (ms)
             let id1 = setInterval(function () {
 
-                frame(p_mercury, html_mercury);
-                frame(p_venus, html_venus);
-                frame(p_earth, html_earth);
-                frame(p_mars, html_mars);
-                frame(p_jupiter, html_jupiter);
+                frame(p_mercury, html_mercury, html_mercury_orbit);
+                frame(p_venus, html_venus, html_venus_orbit);
+                frame(p_earth, html_earth, html_earth_orbit);
+                frame(p_mars, html_mars, html_mars_orbit);
+                frame(p_jupiter, html_jupiter, html_jupiter_orbit);
 
             }, 40); // 40ms = 25 fps
 
-            function frame(planet, html_planet) {
+            function frame(planet, html_planet, html_planet_orbit) {
+
+                // Draw orbital path
+                html_planet_orbit.style.width = 2 * planet.orbital_r;
+                html_planet_orbit.style.height = 2 * planet.orbital_r;
+                html_planet_orbit.style.left = sun.r.x - planet.orbital_r;
+                html_planet_orbit.style.top = sun.r.y - planet.orbital_r;
 
                 // Increment time
                 t = t + dt;
@@ -193,7 +219,7 @@
 
                 // Newtonian Gravity
                 let Fg = -G * (sun.mass * planet.mass) / Math.pow(r, 2);
-                let a = make_vector((Fg / planet.mass) * (del.r.x / r), (Fg / planet.mass) * (del.r.y / r));
+                let a = make_vector((Fg / planet.mass) * (del.x / r), (Fg / planet.mass) * (del.y / r));
 
                 // Update velocity
                 planet.v = planet.v.add(a.sm(dt));
